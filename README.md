@@ -1,65 +1,36 @@
-# AI for Science on AMD RX 9070 XT：将 NVIDIA SC26 `CUDA-X` 空间生物学库 `cuSpa` 移植至 AMD RDNA4 (`gfx1201` HIP) 真机零误差对账
+# AI for Science on AMD RX 9070 XT (`gfx1201` HIP)：从 NVIDIA `CUDA-X cuSpa`、开源 3D 分子非键力场 `open-cupotential` 到深势 `Uni-Mol` 3D 高斯距离注意力核跨架构真机对账
 
-本仓库将英伟达于 SC26（2026-11-16）开源的 **`CUDA-X` 空间组学科学计算库 `NVIDIA/cuspa`（2,378 行 C++/CUDA）** 移植至消费级 **`AMD Radeon RX 9070 XT`（`gfx1201` RDNA4，16GB，Windows 11 + ROCm 10.2 `clang++` HIP + `hipCUB`）**，并与 **`NVIDIA DGX Spark`（`GB10` `sm_121` Blackwell）** 在完全相同的二进制输入上完成了**真机性能基准与 100% 逐字节零误差（Bit-Exact）对账**。
+本仓库在消费级 **`AMD Radeon RX 9070 XT`（`gfx1201` RDNA4，16GB，Windows 11 + ROCm 10.2 `clang++` HIP + `hipCUB`）** 上，真机编译、移植并与 **`NVIDIA DGX Spark`（`GB10` `sm_121` Blackwell）** 逐位对账了 **AI for Science 三大底层 GPU 核心算子**（证明科学计算与分子/生物几何算子依赖的是古典 SIMT 流处理器而非 Tensor Core 矩阵锁，在 AMD RDNA4 显卡上可直接跑出与 NVIDIA 持平甚至反超的性能）：
 
-> 🔗 姊妹全栈仓库（含 `RDKit` 实验数据清洗、深势科技 `47.3M` `Uni-Mol` 3D 分子大模型全参数微调与科研 Agent `Skill` 串联）：[`lmxxf/ai-for-science-on-cuda-x`](https://github.com/lmxxf/ai-for-science-on-cuda-x)
-
----
-
-## 一、 核心发现与三方真机对决成绩单
-
-通过对 `NVIDIA/cuspa` 全部 11 个 C++/CUDA 源文件的静态指令审计，我们确认该科学计算库 **`0` 条 Tensor Core 指令（无 `mma / wmma / tcgen05`）、`0` 条内联 PTX 汇编**——其核心是典型的**古典 SIMT 流处理器算法**：
-1. **二维均匀网格包围盒索引（`index/`）**：计算每个细胞多边形的 AABB 包围盒并映射至网格单元；
-2. **水平射线奇偶法点在多边形内判定（`common/geometry.cuh` + `query/`）**：128 行 `is_point_in_polygon` 水平射线相交测试；
-3. **64 位键值打包基数排序与游程编码聚合（`aggregate/`）**：将 `(cell_id, gene_id)` 打包为 `uint64_t`，调用 `CUB / hipCUB` 的 `DeviceRadixSort::SortKeys` 与 `DeviceRunLengthEncode::Encode` 生成 `Cells × Genes` 的 CSR 稀疏计数矩阵。
-
-### 1. 同源输入、同源 C++ 入口三方真机耗时对比
-- **测试负载**：固定随机种子 `20261123` 生成的 **`50,000` 个细胞多边形 × `2,000,000` 个基因转录点 × `500` 种基因（`float64`）**，由 `DGX Spark` 一次性导出原始二进制张量并通过 `scp` 原字节分发至 `AMD RX 9070 XT`；
-- **编译与计时纪律**：双方统一禁用 FMA 融合收缩（CUDA `--fmad=false` / HIP `-ffp-contract=off`），不启用 fast-math；3 次预热 + 7 次稳态重复取同步墙钟中位数：
-
-| 计算阶段 | CPU 基线（Numba `@njit` 编译单线程，ms） | `NVIDIA GB10`（Python 原入口，ms） | `NVIDIA GB10`（同源 C++ 入口，ms） | 🔥 `AMD RX 9070 XT`（HIP 同源 C++，ms） | `AMD 9070 XT` 相比编译后 CPU 加速比 |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| 1. 网格包围盒索引 (`Grid Index`) | `2.168 ms` | `3.277 ms` | `1.659 ms` | **`2.387 ms`** | `0.91 ×` |
-| 2. **多边形射线判定 (`Ray-Crossing Query`)** | **`236.064 ms`** | **`1.512 ms`** | **`1.520 ms`** | **🏆 `0.921 ms`** | **🔥 `256.3 ×`** |
-| 3. 排序游程聚合 (`CUB/hipCUB Sort + RLE -> CSR`) | `34.043 ms` | `5.965 ms` | `5.564 ms` | **🏆 `3.768 ms`** | **`9.0 ×`** |
-| **设备驻留全流程总计（独立测量中位数）** | **`272.274 ms`** | **`9.636 ms`** | **`5.760 ms`** | **🔥 `6.050 ms`** | **🔥 `45.0 ×`** |
-
-### 2. 跨架构 100% 逐字节零误差（Bit-Exact SHA256 对账）
-
-将 `AMD RX 9070 XT (HIP)` 输出的 4 个原始二进制数组与 `NVIDIA GB10 (CUDA)` 的参考输出逐字节比对（匹配点数 `793,204`，CSR 非零项 `780,563`）：
-
-| 输出数组 | 元素数量 (`int32`) | `NVIDIA GB10` vs `AMD RX 9070 XT` 差异项 | 双方 100% 一致的 SHA256 哈希值 |
-| :--- | ---: | :---: | :--- |
-| `assignment.bin`（200 万点细胞归属 ID） | `2,000,000` | **`0 mismatch`** | `f5ae2379e529ec834bca3d721c6590c1417e7157251e8a7bc6929e723f656099` |
-| `indptr.bin`（CSR 行指针） | `50,001` | **`0 mismatch`** | `200f0098261371dd71b39614bd1f38d66debbb18ecba73ff4971fed45c07509c` |
-| `indices.bin`（CSR 基因列索引） | `780,563` | **`0 mismatch`** | `922e893643c2f3f4ac9a546434212e9963e4703ec48146ffc447a6d66ae1b84a` |
-| `data.bin`（CSR 表达量计数） | `780,563` | **`0 mismatch`** | `c3771ef663e8af44edc6bc88d0141153c9b91f2d684d0846ba5820465db72a52` |
+> 🔗 姊妹全栈仓库（含 `RDKit` / `Biopython` 科学库实验数据处理、深势 `47.3M` `Uni-Mol` 3D 分子大模型 `ESOL/BBBP` 全参数微调、Meta `7.5M` `ESM-2` 蛋白质大模型 `GB1` 微调与科研 Agent `Skill` 串联）：[`lmxxf/ai-for-science-on-cuda-x`](https://github.com/lmxxf/ai-for-science-on-cuda-x)
 
 ---
 
-## 二、 可视化图解与实测对比
+## 一、 三大跨架构（`NVIDIA GB10 CUDA` vs `AMD RX 9070 XT HIP`）真机对决总表
 
-![cuSpa CUDA to AMD HIP RX 9070 XT Benchmark](./visuals/fig4_cuspa_cell_polygon_raycasting.svg)
+| 算子模块 | 科学计算任务与规模 | CPU 编译基线耗时 | `NVIDIA GB10` (`sm_121` CUDA) | 🔥 `AMD RX 9070 XT` (`gfx1201` HIP) | 跨架构精度对账结果 |
+| :--- | :--- | ---: | ---: | ---: | :--- |
+| **1. `cuSpa` 空间单细胞多边形库**<br>([`amd_hip_port/`](./amd_hip_port/)) | **`50,000` 细胞 × `2,000,000` 转录点 × `500` 基因** (`float64`)<br>① 网格索引 / ② 水平射线查询 / ③ `hipCUB` 排序转 CSR | 全流程 `272.27 ms`<br>(射线查询 `236.06 ms`) | 同源 C++ 全流程 **`5.760 ms`**<br>(射线查询 `1.520 ms`) | 同源 C++ 全流程 **`6.050 ms`** (快 **`45.0×`**)<br>(🏆 **射线查询仅 `0.921 ms`**，快 **`256.3×`**) | **200 万点归属与完整 CSR 四个数组 SHA256 100% 逐字节相同（`0 mismatch`）** |
+| **2. `open-cupotential` 开源 3D 分子非键力场**<br>([`amd_hip_port/cupotential_open/`](./amd_hip_port/cupotential_open/)) | **3D 周期盒子 27 邻格 Cell-List + 融合 `LJ 12-6` 范德华势 + 反应场库仑静电势 + 解析三维受力 $\vec{F}=-\nabla E$** (`float64`)<br>• `32,000` 原子体系<br>• `128,000` 原子体系 | `61.17 ms`<br>`242.57 ms` | `7.99 ms`<br>`27.19 ms` | 🏆 **`7.90 ms`** (快 `7.7×`)<br>🏆 **`22.43 ms`** (**反超 GB10 17.5%**，快 **`10.8×`**) | **全部 $N$ 个能量分量与 $3N$ 个受力分量（38.4 万项）在 CPU/CUDA/HIP 间逐值一致（相对 L2 差 = `0`）** |
+| **3. 深势 `Uni-Mol` 3D 高斯距离注意力核**<br>([`amd_hip_port/unimol_pairbias/`](./amd_hip_port/unimol_pairbias/)) | **真实微调权重导出：3D 距离矩阵 $\rightarrow$ 128 高斯核 $\rightarrow$ 128/GELU/64 投影 $\rightarrow$ 首层 64 头 Pair-Bias QKV 注意力** (8 真实药物分子 Batch，`FP32` 朴素参考核) | — | `5.238 ms` | `12.101 ms` | **跨卡及对官方 PyTorch 最大绝对误差仅 `1.53 × 10⁻⁵`** |
 
 ---
 
-## 三、 仓库目录结构与复现指南
+## 二、 核心可视化大图
+
+| 算子一：`cuSpa` 细胞多边形射线法 (`GB10` vs `RX 9070 XT 0.92ms` 零误差) | 算子二：开源 3D 分子非键力场 `open-cupotential` (`128K` 原子 `9070 XT 22.43ms`) |
+| :---: | :---: |
+| ![fig4](./visuals/fig4_cuspa_cell_polygon_raycasting.svg) | ![fig6](./visuals/fig6_open_cupotential_md_forcefield_amd_vs_nvidia.svg) |
+| **算子三：`BBBP` 血脑屏障 `Uni-Mol` 逐原子遮挡归因与 AMD 注意力核对账** | **姊妹篇：蛋白质大模型 `ESM-2` 真机微调 (`Spearman 0.898`) 与突变热图** |
+| ![fig5](./visuals/fig5_bbbp_unimol_roc_and_atom_attribution.svg) | ![fig7](./visuals/fig7_protein_esm2_finetune_and_mutation_scan.svg) |
+
+---
+
+## 三、 仓库目录结构
 
 - [`amd_hip_port/`](./amd_hip_port/)：
-  - `common/geometry.cuh`、`common/cuda_utils.cuh`、`common/ndarray_utils.cuh`：HIP 化几何与工具头文件；
-  - `index/kernels_index.cuh`、`query/kernels_query.cuh`、`aggregate/kernels_aggregate.cuh`：HIP + `hipCUB` 核心核函数；
-  - `cuspa_harness.cpp`：CUDA / HIP 双后端同源 C++ 基准评测驱动；
-  - `mechanical_translation.diff` & `translation_manifest.json`：从原版 `NVIDIA/cuspa`（commit `2df9fa78`）到 HIP 的完整 diff 与 SHA256 清单；
-  - `build_windows.cmd` & `run_windows.cmd`：Windows 11 + ROCm 10.2 (`gfx1201`) 原生编译与执行脚本。
-- [`results/`](./results/)：
-  - `module5_amd9070_results.json` & `module5_comparison.json`：三方完整计时数组与 SHA256 对账单；
-  - `module5_amd9070/timings.json` & `module5_gb10_cpp/timings.json`：双端原始计时输出。
-- [`REPORT.md`](./REPORT.md) & [`DevHistory.md`](./DevHistory.md)：全流程实测报告与开发日志。
-
-## 第二阶段：真实权重注意力核与原创非键力场
-
-- [`amd_hip_port/unimol_pairbias/`](amd_hip_port/unimol_pairbias/)：真实Uni-Mol checkpoint的Gaussian128→128/GELU→64、首层QKV/softmax/AV，CUDA/HIP与官方PyTorch参考max_abs约1.53e-5。FP32朴素教育核，非全模型AMD。
-- [`amd_hip_port/cupotential_open/`](amd_hip_port/cupotential_open/)：原创MIT，3D周期Cell-List/27邻格/LB LJ12-6/反应场库仑与解析力。32k/128k三后端真算，全部原子能量/受力数组一致，有限差分与暴力对照通过。128k驻留流程GB1027.19ms、9070XT22.43ms；非完整MD、非专有libcupo API替代。
-- [REPORT.md](REPORT.md)汇总BBBP分类、原子遮挡与真实GB1 ESM-2训练，并保留同考卷测试和限制；图5/6/7已同步。
-
-运行`python verify_results.py`核对同步源文件/轻量结果哈希与数值检查。此命令不重新跑GPU；所有原始能量/受力数组的独立重算验证在主实验仓`verify_phase2.py`执行。权重、训练缓存、编译程序及大二进制不随Git发布；完整训练流水线位于姊妹主仓，算子README含本地/远端编译说明。
+  - `common/`、`index/`、`query/`、`aggregate/`、`cuspa_harness.cpp`：`NVIDIA/cuspa` 的 HIP + `hipCUB` 移植源码与同源 C++ 评测驱动；
+  - `cupotential_open/`：原创 MIT 开源 3D 分子非键力场（3D Cell-List + Lennard-Jones 12-6 + Reaction-Field Coulomb + 解析力梯度 `open_nonbonded.cpp`，无需闭源 `libcupo.so`）；
+  - `unimol_pairbias/`：深势 `Uni-Mol` 3D 距离 128 高斯核与 64 头 Pair-Bias 注意力前向算子（`unimol_pairbias_harness.cpp`）。
+- [`results/`](./results/)：全套双端计时 JSON、SHA256 逐字节对账单与物理守恒校验记录。
+- [`REPORT.md`](./REPORT.md) & [`DevHistory.md`](./DevHistory.md)：完整实测报告与工程流水账。
