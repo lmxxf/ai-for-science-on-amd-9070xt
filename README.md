@@ -34,3 +34,15 @@
   - `unimol_pairbias/`：深势 `Uni-Mol` 3D 距离 128 高斯核与 64 头 Pair-Bias 注意力前向算子（`unimol_pairbias_harness.cpp`）。
 - [`results/`](./results/)：全套双端计时 JSON、SHA256 逐字节对账单与物理守恒校验记录。
 - [`REPORT.md`](./REPORT.md) & [`DevHistory.md`](./DevHistory.md)：完整实测报告与工程流水账。
+
+## 第三阶段：五领域实算与完整Uni-Mol
+
+全部源码在`amd_hip_port/`的`cupotential_pme_md`、`daviator_batched_dft`、`cuphoton_xbeam_fx`、`gpuhmmer_viterbi`、`unimol_full15_hip`，新增图8–12和完整[REPORT.md](REPORT.md)已同步。
+
+- PME/1000步MD：81原子完整实/倒易与键角，9070XT NVE0.797s；能量漂移1.09e-4，步长减半改善4倍。64³ PME对直接Ewald误差4.94e-5明确保留。
+- Block-Davidson：64×384、1024本征值max_abs4.73e-14。批处理核心提速AMD2.80倍、端到端1.15倍，没有复现22倍；部分子空间算法在CPU。
+- 射电FX：6710万复采样，合成天空协方差→电压→FFT/相关→CPU CLEAN；跨GPU可见度差2.84e-16，恢复PSNR15.23dB，非EHT实测。
+- Profile-HMM：10万条三状态Viterbi，9070XT60.7ms，全部scores与CPU/GB10逐字节一致。植入/背景库是合成检出任务。
+- **完整15层Uni-Mol**：真实47.3M、原112个测试分子已在原生HIP/hipBLAS端到端执行。同FP64预测差7.1e-15；官方FP32 Gaussian兼容模式对官方完整FP32最大差2.27e-6<1e-5。旧BF16结果保留，不强行贴不同精度指标。
+
+`python verify_phase3_results.py`检查全部同步源码/轻量证据哈希与验收摘要；主仓`verify_phase3.py`已从原始轨迹、本征对、全部可见度/score与50M层间元素独立重算。不是运行镜像摘要脚本就冒称重新跑GPU。大输入/权重/trace留实验机器，通过主仓脚本和各子目录README复现，不随Git传输。
