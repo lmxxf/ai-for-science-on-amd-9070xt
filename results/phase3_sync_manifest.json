@@ -7,11 +7,11 @@
     },
     {
       "path": "REPORT.md",
-      "sha256": "d3fc0114e0436f94a5989c5216380cadb007b8ee09b726083b060ad2018c9d0e"
+      "sha256": "89c5e91fa3d5aa57591a68e77174ece265648fcbafc4cdb94f3644e286077f57"
     },
     {
       "path": "DevHistory.md",
-      "sha256": "8a7fc8b1a6364d54ccb5be89327119a4109a8d26de9e53751c70e419a210ea54"
+      "sha256": "a83f62fc90c814d30144c28435646ee1979b38bf83c84da2dea5dd7f0639ac0e"
     },
     {
       "path": "guard_process.py",
@@ -19,7 +19,7 @@
     },
     {
       "path": "verify_phase3.py",
-      "sha256": "6c71953e914a3fa28ce59719e93eb9fb56bcca566e936fddd069f4eeccabce75"
+      "sha256": "fbf19d08d46b427e9d9fc10e9c905c6eaf8f481a48ed493715a0f88bbefe9566"
     },
     {
       "path": "MODULE9_NOTES.md",
@@ -47,7 +47,7 @@
     },
     {
       "path": "exp8_daviator_batched_davidson_hip.py",
-      "sha256": "e365c1196ec1f5d8030e0bbd8a2d6681d878b462c82d41a03116e3a8a0b896f5"
+      "sha256": "01993b70827cc1dc738d6e7990d9024f5d6ed6a11272d442e0175681d2e3c358"
     },
     {
       "path": "exp9_cuphoton_blackhole_fx_hip.py",
@@ -94,8 +94,24 @@
       "sha256": "b59c9be8101efa14586748effa8894d7f4cebb72bdaf5a4157b2b9ff578ea852"
     },
     {
+      "path": "amd_hip_port/daviator_batched_dft/resident_run_windows.cmd",
+      "sha256": "820ecd6967ac9d77f86a481025613dc6422ff895d329b5106c5b9c58c772aa41"
+    },
+    {
       "path": "amd_hip_port/daviator_batched_dft/seq.log",
       "sha256": "d4d88c6d1740ddc1077fc1fc3b9e2a76edd351836f23d5747dce3e065ddb75a9"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident.cpp",
+      "sha256": "16c8781034ea2c8e2af1a0f6ed49d6c2f8a1bc7a30504fbfa71574c057a20165"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_run.log",
+      "sha256": "1075bdfbdc0a95dbb9bcfd4b86e6fcab93079e9a5512f95b0b9688676dd7c34f"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_build_windows.cmd",
+      "sha256": "e5e6fc9cc6892a7f99f982de26f021a17d2d620bd3a299fd7afe8655b710bb60"
     },
     {
       "path": "amd_hip_port/daviator_batched_dft/run_windows.cmd",
@@ -112,6 +128,14 @@
     {
       "path": "amd_hip_port/daviator_batched_dft/davidson.cpp",
       "sha256": "200ad37500ad51f49a86152a20615e978dae385c085ef8e5ecc15551fd8110bb"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/LICENSE",
+      "sha256": "daf94eb9c0fe09c281ca37224d7250393f4bfc51f528fe495895418c9f1e09f2"
     },
     {
       "path": "amd_hip_port/daviator_batched_dft/build.log",
@@ -303,7 +327,7 @@
     },
     {
       "path": "results/module10_results.json",
-      "sha256": "54534fe0758d8faa8b0cf22a6a96ed94ffa2086283f8cd2e6466c1f84ca7f0ad"
+      "sha256": "c5766f99cab861fd359d976d34c2d0fa0c4275e92abe734338d8d57bd4f01cd3"
     },
     {
       "path": "results/module11_cpu_images.npz",
@@ -463,10 +487,14 @@
     },
     {
       "path": "visuals/fig9_daviator_batched_davidson_vasp_band.png",
-      "sha256": "28e420c47dcfbfc2874967dc8a8ec5d140e716a17d5b98b4f3698155f9ef9f53"
+      "sha256": "efb71f34f842505fc6cd9bfec0c6c87a6284870a672253bcf19237ba6cbb210c"
     },
     {
       "path": "visuals/fig9_daviator_batched_davidson_vasp_band.svg",
+      "sha256": "9ebf529d48c3884a48cd51eb6b610a4faf269851acb009686f57bac4dd4ccbc1"
+    },
+    {
+      "path": "visuals/fig9_daviator_hybrid_original.svg",
       "sha256": "a9ca601f7b662a46d194bc3a8338064dbeb29b66c36963797c39ebb3afdedddf"
     },
     {

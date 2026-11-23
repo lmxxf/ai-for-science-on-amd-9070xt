@@ -1,0 +1,313 @@
+{
+  "source_workspace": "/home/lmxxf/work/ai-for-science-on-cuda-x",
+  "files": [
+    {
+      "path": "PHASE4_NVMOLKIT_AND_AUDIT_PLAN.md",
+      "sha256": "9899a27fdd451356d91a18ed58c1c807e27003c19e8f18a7327047192c13050e"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "89c5e91fa3d5aa57591a68e77174ece265648fcbafc4cdb94f3644e286077f57"
+    },
+    {
+      "path": "DevHistory.md",
+      "sha256": "a83f62fc90c814d30144c28435646ee1979b38bf83c84da2dea5dd7f0639ac0e"
+    },
+    {
+      "path": "MODULE14_NOTES.md",
+      "sha256": "28dd370aba7ce8ba54eabe7fbbfe8f21ceaa6645dd448b2754264edb50c2b76d"
+    },
+    {
+      "path": "MODULE15_NOTES.md",
+      "sha256": "175debe1837bc7f644552863c7b6c6734dc60d75081d10cef1d12d87bf0c970c"
+    },
+    {
+      "path": "MODULE16_NOTES.md",
+      "sha256": "b99898eb0ec556f9ed85059158a1b60d4dcb430a1af32b555fba910dcc89a79c"
+    },
+    {
+      "path": "exp12_open_nvmolkit_batched_conformer_hip.py",
+      "sha256": "891c6ae2c5476e0a17179956d4e39c1d3f299c9b1cd479e21da4faccd2e332ee"
+    },
+    {
+      "path": "exp13_daviator_resident_hip.py",
+      "sha256": "004ba0521d313b5ea642837f3749f92aad6d376b4cb63739aab47e7c5ca30017"
+    },
+    {
+      "path": "exp14_audit381_record.py",
+      "sha256": "43507cc5f4b628210a57ce305f13f91302ed823a80ed17391e90ce1ed14599e3"
+    },
+    {
+      "path": "verify_phase4.py",
+      "sha256": "18bc54c25ef22d5952550324bf5394a13664ac41e749b7b197bfcaeb9f06f686"
+    },
+    {
+      "path": "render_module14.py",
+      "sha256": "0e9fc601a8d86ca034df1479a2daf2f650a3aba1eb21f9f0fd6eb212b36f24e7"
+    },
+    {
+      "path": "amd_hip_port/nvmolkit_batched_conformer/README.md",
+      "sha256": "6bfe90f6f60f626eb1f370759274da410fdf95e43be426df4928add11107d043"
+    },
+    {
+      "path": "amd_hip_port/nvmolkit_batched_conformer/conformer.cpp",
+      "sha256": "ae576d69b1dcc6d395ff7c5e0628eb652141454526af40d16a9c4af4e919c904"
+    },
+    {
+      "path": "amd_hip_port/nvmolkit_batched_conformer/run_windows.cmd",
+      "sha256": "5d3cba5f9660644bb0d88e61ecc9fbaef0e8b1a24e2bd6184d1e81f23f4b2adc"
+    },
+    {
+      "path": "amd_hip_port/nvmolkit_batched_conformer/build_windows.cmd",
+      "sha256": "4e8d369d5b837a618f46bc22a7fa7e9a925a17c121895d88562e1c7b30401515"
+    },
+    {
+      "path": "amd_hip_port/nvmolkit_batched_conformer/build_windows.log",
+      "sha256": "88ee5af7c3e0631b53fd56d27c1b56a6921f2fb9e45445a4be17d13eab7111db"
+    },
+    {
+      "path": "amd_hip_port/nvmolkit_batched_conformer/LICENSE",
+      "sha256": "b59c9be8101efa14586748effa8894d7f4cebb72bdaf5a4157b2b9ff578ea852"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_run_windows.cmd",
+      "sha256": "820ecd6967ac9d77f86a481025613dc6422ff895d329b5106c5b9c58c772aa41"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/seq.log",
+      "sha256": "d4d88c6d1740ddc1077fc1fc3b9e2a76edd351836f23d5747dce3e065ddb75a9"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident.cpp",
+      "sha256": "16c8781034ea2c8e2af1a0f6ed49d6c2f8a1bc7a30504fbfa71574c057a20165"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_run.log",
+      "sha256": "1075bdfbdc0a95dbb9bcfd4b86e6fcab93079e9a5512f95b0b9688676dd7c34f"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_build_windows.cmd",
+      "sha256": "e5e6fc9cc6892a7f99f982de26f021a17d2d620bd3a299fd7afe8655b710bb60"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/run_windows.cmd",
+      "sha256": "c769b409c3773c4a5df00dc295ff031619a4f8f1e555ea501d201cacf1d52705"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/build_windows.cmd",
+      "sha256": "9432e7b1bbd0580202c264e4fbca44ce3f94d17f7aa39a8ccb31f763afd083a3"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/batch.log",
+      "sha256": "d4d88c6d1740ddc1077fc1fc3b9e2a76edd351836f23d5747dce3e065ddb75a9"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/davidson.cpp",
+      "sha256": "200ad37500ad51f49a86152a20615e978dae385c085ef8e5ecc15551fd8110bb"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/resident_build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/LICENSE",
+      "sha256": "daf94eb9c0fe09c281ca37224d7250393f4bfc51f528fe495895418c9f1e09f2"
+    },
+    {
+      "path": "amd_hip_port/daviator_batched_dft/build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "results/module15_hip_64_batch_timings.json",
+      "sha256": "38c71bbc84bf8e5212d4efadd86424516901774428ef4e2b4bf3d24bd840ca65"
+    },
+    {
+      "path": "results/module14_results.json",
+      "sha256": "9c2e2733ed5724daff9163ba698c524b5db403b6899ba82c9353ba78366ae8bc"
+    },
+    {
+      "path": "results/module14_failed_weak_lj_results.json",
+      "sha256": "4dcfa353a6f1f6164ed838605e7d453b76ba8c5ad6b8f00631996dfe30c36676"
+    },
+    {
+      "path": "results/module14_preparation.json",
+      "sha256": "ded687013761aaf601948ec2e6b540a2f8611e932a3f0defe6a93da11a82b124"
+    },
+    {
+      "path": "results/module15_cuda_pilot.log",
+      "sha256": "9c335f066091662bd771c482fc92c91e16f3f3ee688f9ca13e44edd0203c3a13"
+    },
+    {
+      "path": "results/module15_hip_64_batch_history.csv",
+      "sha256": "c9be2817c6c639595222e2c8475c4ff065d0ec14996fd242f8a66494081a3b0c"
+    },
+    {
+      "path": "results/module15_cpu_64_history.csv",
+      "sha256": "927190fc8498e99bfa6013e37d33b898d524af53d3f20a6683f57c72d8f18004"
+    },
+    {
+      "path": "results/module16_results.json",
+      "sha256": "a85b84ee9e6942a5623c363fb9036d30fa67893752aea13aba807bbb83c6672b"
+    },
+    {
+      "path": "results/module15_gpu.log",
+      "sha256": "9481e0866a4ab3f30a9ce0da6ab246f01fc3f90656283137e556c9298f4e0d74"
+    },
+    {
+      "path": "results/module15_hip_64_seq_history.csv",
+      "sha256": "c9be2817c6c639595222e2c8475c4ff065d0ec14996fd242f8a66494081a3b0c"
+    },
+    {
+      "path": "results/module15_cuda_64_seq_history.csv",
+      "sha256": "b3eca2492d47871ec9d7f55fc356012dc47024b27bd989c45d0de7db6eed3805"
+    },
+    {
+      "path": "results/module15_development_audit.json",
+      "sha256": "89db043e61a37469000781680dab6e9deb97603047a3207726a10596ce22ec94"
+    },
+    {
+      "path": "results/module15_cuda_256_seq_timings.json",
+      "sha256": "49d346da1e11590ebb6e0a597042af549a85948b4bf08e1f7ef2f9de02892594"
+    },
+    {
+      "path": "results/module15_cpu_256_timings.json",
+      "sha256": "0a8bcf309c4aa261b3ff099580b15e8e4a1d1428541181341089eaa031b45c5e"
+    },
+    {
+      "path": "results/module15_hip_256_batch_timings.json",
+      "sha256": "afcd6e3ceaa50ac7a77bf5e7de8a495e94e83371e8c29b6c3df367750bf05293"
+    },
+    {
+      "path": "results/module15_cuda_64_pilot_history.csv",
+      "sha256": "b3eca2492d47871ec9d7f55fc356012dc47024b27bd989c45d0de7db6eed3805"
+    },
+    {
+      "path": "results/module15_cuda_64_pilot_timings.json",
+      "sha256": "fa0f962d107ad563a29f449a91f3f13d0f7f9bb5ec6abf5ccaa4a74ae273d43f"
+    },
+    {
+      "path": "results/module15_cpu_256_history.csv",
+      "sha256": "b6344cbd39dfb63525f99f693d8624949f7f2258555143bb451134858810e9a7"
+    },
+    {
+      "path": "results/module14_gradient_validation.json",
+      "sha256": "343d844bb81b7f208a30f7e641b5857d8a7202db804500cf4f0c1df0667a72a2"
+    },
+    {
+      "path": "results/module15_cuda_256_batch_history.csv",
+      "sha256": "e46ed0f06c4f24b237f66e629fad46b207aee88e65f458a7a4fbcb56f3da9812"
+    },
+    {
+      "path": "results/module15_prepare.log",
+      "sha256": "ae2b4c6f620b0fd6272221eaf62301729048d591f6d18a4c3c4c80ab0a5dab5c"
+    },
+    {
+      "path": "results/module15_cuda_256_batch_timings.json",
+      "sha256": "2632aba39613bfd5fe55409b5c718438260e6ea7c3db5e05ea7cc534b21b4403"
+    },
+    {
+      "path": "results/module15_summary.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "results/module15_cuda_64_batch_timings.json",
+      "sha256": "b28d9d11e21630a02c297571a37f59beb0065d5009309ff7ba9b624a2be4da81"
+    },
+    {
+      "path": "results/module15_results.json",
+      "sha256": "898e2f332af291484ae99d7f82e3dc1dfd660dc2fef8499a895864be7bc84381"
+    },
+    {
+      "path": "results/module15_cuda_64_seq_timings.json",
+      "sha256": "6f915886f0fcf2f34c6e6b989ba2668ff52e8f48679ba2c84b4e7c8247db8b35"
+    },
+    {
+      "path": "results/module16_initial_article.json",
+      "sha256": "c41d66f8b1717b4f4e0fde0190b7710b1a5bbc98729268563475499dfd4aee26"
+    },
+    {
+      "path": "results/module15_cpu_64_timings.json",
+      "sha256": "8c9f046b46fb190b3dd5664a68dbf029a4598544ca41d9927bffa4a75aad8307"
+    },
+    {
+      "path": "results/module15_hip_256_seq_timings.json",
+      "sha256": "7d3962b57b637db9cbabd2606ae98f4731a2f7d65534c8de02eccbf79e35b5d5"
+    },
+    {
+      "path": "results/module15_hip_256_batch_history.csv",
+      "sha256": "a564c5e9a270390a52a559192810c339d041f45c46cb8aac9ca84a03c6e861f1"
+    },
+    {
+      "path": "results/module15_hip_64_seq_timings.json",
+      "sha256": "272ecc71de8c524a28ab2332cf94a1b1a10f90ec409a29b9b4bfae3815284ad5"
+    },
+    {
+      "path": "results/module15_cuda_256_seq_history.csv",
+      "sha256": "e46ed0f06c4f24b237f66e629fad46b207aee88e65f458a7a4fbcb56f3da9812"
+    },
+    {
+      "path": "results/module15_cuda_64_batch_history.csv",
+      "sha256": "b3eca2492d47871ec9d7f55fc356012dc47024b27bd989c45d0de7db6eed3805"
+    },
+    {
+      "path": "results/module15_hip_256_seq_history.csv",
+      "sha256": "a564c5e9a270390a52a559192810c339d041f45c46cb8aac9ca84a03c6e861f1"
+    },
+    {
+      "path": "results/module14_data/molecules.json",
+      "sha256": "b8077ff8ffb95ec80da9eb3a7b4b5a1aacfd81c45d94069b9bd429e9be9c49e6"
+    },
+    {
+      "path": "results/module14_failed_weak_lj_hip/timings.json",
+      "sha256": "4a44a0347becc69462ade757817e076e8398e65f1034314cf7f6c5cfc5ae930f"
+    },
+    {
+      "path": "results/module14_cpu/timings.json",
+      "sha256": "c7c73cf3eb2a26e2952a568f6c5406259136b521cfeb118ab4f654768cc5afeb"
+    },
+    {
+      "path": "results/module14_failed_weak_lj_cpu/timings.json",
+      "sha256": "d79e7d03ba507bf99394f3b9b9427b17e26d22f09d4f41ec3a8ab9fbbb3c1e22"
+    },
+    {
+      "path": "results/module14_hip/timings.json",
+      "sha256": "e1c22017b35e6d113607fec16cb26efcbbb7be613c8359e891593389d7d2b05d"
+    },
+    {
+      "path": "results/module14_failed_weak_lj_cuda/timings.json",
+      "sha256": "c92288144069969a391f14f198f82f5b67145c3aa0e0ca814ab3294c79c332d1"
+    },
+    {
+      "path": "results/module14_cuda/timings.json",
+      "sha256": "05dc9e44e96f7caeed4ece58cff0aed158d3195cb96cdee95cab1ae855bdbcb6"
+    },
+    {
+      "path": "results/module15_data/256/metadata.json",
+      "sha256": "ca92b6205dfd234e7097cf67c508c0ed543de56f29c9072294d250bd3f1dc8ce"
+    },
+    {
+      "path": "results/module15_data/64/metadata.json",
+      "sha256": "a9e6a3e2840c9d58afec3d97796f45fed6375833f12c0b58ede84ee4739397c6"
+    },
+    {
+      "path": "visuals/fig9_daviator_batched_davidson_vasp_band.svg",
+      "sha256": "9ebf529d48c3884a48cd51eb6b610a4faf269851acb009686f57bac4dd4ccbc1"
+    },
+    {
+      "path": "visuals/fig9_daviator_batched_davidson_vasp_band.png",
+      "sha256": "efb71f34f842505fc6cd9bfec0c6c87a6284870a672253bcf19237ba6cbb210c"
+    },
+    {
+      "path": "visuals/fig9_daviator_hybrid_original.svg",
+      "sha256": "a9ca601f7b662a46d194bc3a8338064dbeb29b66c36963797c39ebb3afdedddf"
+    },
+    {
+      "path": "visuals/fig13_open_nvmolkit_10000_conformers_amd_vs_nvidia.svg",
+      "sha256": "1cbfea9fe9785714f7f13cf5bc58f3e8a5620da51916ce68732764f383b923b5"
+    },
+    {
+      "path": "visuals/fig13_open_nvmolkit_10000_conformers_amd_vs_nvidia.png",
+      "sha256": "9519f7449193508f387f2ba421fcd2700427b5d8fd0fd4a7b0c52903634393e3"
+    }
+  ]
+}

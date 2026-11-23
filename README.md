@@ -55,3 +55,11 @@
 - **完整15层Uni-Mol**：真实47.3M、原112个测试分子已在原生HIP/hipBLAS端到端执行。同FP64预测差7.1e-15；官方FP32 Gaussian兼容模式对官方完整FP32最大差2.27e-6<1e-5。旧BF16结果保留，不强行贴不同精度指标。
 
 `python verify_phase3_results.py`检查全部同步源码/轻量证据哈希与验收摘要；主仓`verify_phase3.py`已从原始轨迹、本征对、全部可见度/score与50M层间元素独立重算。不是运行镜像摘要脚本就冒称重新跑GPU。大输入/权重/trace留实验机器，通过主仓脚本和各子目录README复现，不随Git传输。
+
+## 第四阶段：构象松弛与全GPU驻留求解
+
+- [`amd_hip_port/nvmolkit_batched_conformer/`](amd_hip_port/nvmolkit_batched_conformer/)：10k fresh ETKDG构象×200轮，简化重原子FF；CPU10.522s/GB103.229s/9070XT3.853s，全部有效XYZ/能量/历史三方逐位相同。弱排斥失败47→1138完整保留，修正同输入后47→0。不冒称MMFF94等价加速或实际nvMolKit全部功能。
+- [`amd_hip_port/daviator_batched_dft/resident.cpp`](amd_hip_port/daviator_batched_dft/resident.cpp)：共享Jacobi、两遍MGS与收敛全部GPU，24Ritz+8修正厚重启。64/256组15–16轮，λ误差<=7.22e-15；B256 batch总GB10/AMD0.791/0.698s。高seq/batch倍率来自本单block串行/并行占用率对照，不是官方性能承诺。
+- 381只读终审已完成，元数据及完整实验报告同步；发现2P0/11P1/11P2，正文和6资源未变。正式审稿意见位于公众号姊妹仓，不能把审稿完成当事实已全部修正。
+
+`python verify_phase4_results.py`核对同步源文件和轻量证据哈希；完整原始数值/碰撞/本征对与文章哈希验收在主仓`verify_phase4.py`，不是摘要脚本重新跑GPU。更新图9、新图13及失败复盘见[REPORT.md](REPORT.md)。
