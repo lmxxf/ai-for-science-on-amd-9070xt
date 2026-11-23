@@ -55,3 +55,11 @@
   - `module5_amd9070_results.json` & `module5_comparison.json`：三方完整计时数组与 SHA256 对账单；
   - `module5_amd9070/timings.json` & `module5_gb10_cpp/timings.json`：双端原始计时输出。
 - [`REPORT.md`](./REPORT.md) & [`DevHistory.md`](./DevHistory.md)：全流程实测报告与开发日志。
+
+## 第二阶段：真实权重注意力核与原创非键力场
+
+- [`amd_hip_port/unimol_pairbias/`](amd_hip_port/unimol_pairbias/)：真实Uni-Mol checkpoint的Gaussian128→128/GELU→64、首层QKV/softmax/AV，CUDA/HIP与官方PyTorch参考max_abs约1.53e-5。FP32朴素教育核，非全模型AMD。
+- [`amd_hip_port/cupotential_open/`](amd_hip_port/cupotential_open/)：原创MIT，3D周期Cell-List/27邻格/LB LJ12-6/反应场库仑与解析力。32k/128k三后端真算，全部原子能量/受力数组一致，有限差分与暴力对照通过。128k驻留流程GB1027.19ms、9070XT22.43ms；非完整MD、非专有libcupo API替代。
+- [REPORT.md](REPORT.md)汇总BBBP分类、原子遮挡与真实GB1 ESM-2训练，并保留同考卷测试和限制；图5/6/7已同步。
+
+运行`python verify_results.py`核对同步源文件/轻量结果哈希与数值检查。此命令不重新跑GPU；所有原始能量/受力数组的独立重算验证在主实验仓`verify_phase2.py`执行。权重、训练缓存、编译程序及大二进制不随Git发布；完整训练流水线位于姊妹主仓，算子README含本地/远端编译说明。

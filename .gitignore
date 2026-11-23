@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.exe
+*.obj
+*.pdb
+amd_hip_port/unimol_pairbias/input/
+amd_hip_port/unimol_pairbias/out_cuda/*.bin
+amd_hip_port/unimol_pairbias/out_hip/*.bin
+amd_hip_port/unimol_pairbias/pairbias_cuda
+results/module7_build/
+results/module7_data/
+results/module7_*/*.bin
