@@ -6,23 +6,32 @@
 
 ---
 
-## 一、 三大跨架构（`NVIDIA GB10 CUDA` vs `AMD RX 9070 XT HIP`）真机对决总表
+## 一、 八大跨架构（`NVIDIA GB10 CUDA` vs `AMD RX 9070 XT HIP`）真机对决总表
 
-| 算子模块 | 科学计算任务与规模 | CPU 编译基线耗时 | `NVIDIA GB10` (`sm_121` CUDA) | 🔥 `AMD RX 9070 XT` (`gfx1201` HIP) | 跨架构精度对账结果 |
+| 算子模块 | 科学计算任务与规模 | CPU 基线耗时 | `NVIDIA GB10` (`sm_121` CUDA) | 🔥 `AMD RX 9070 XT` (`gfx1201` HIP) | 跨架构精度对账结果 |
 | :--- | :--- | ---: | ---: | ---: | :--- |
 | **1. `cuSpa` 空间单细胞多边形库**<br>([`amd_hip_port/`](./amd_hip_port/)) | **`50,000` 细胞 × `2,000,000` 转录点 × `500` 基因** (`float64`)<br>① 网格索引 / ② 水平射线查询 / ③ `hipCUB` 排序转 CSR | 全流程 `272.27 ms`<br>(射线查询 `236.06 ms`) | 同源 C++ 全流程 **`5.760 ms`**<br>(射线查询 `1.520 ms`) | 同源 C++ 全流程 **`6.050 ms`** (快 **`45.0×`**)<br>(🏆 **射线查询仅 `0.921 ms`**，快 **`256.3×`**) | **200 万点归属与完整 CSR 四个数组 SHA256 100% 逐字节相同（`0 mismatch`）** |
 | **2. `open-cupotential` 开源 3D 分子非键力场**<br>([`amd_hip_port/cupotential_open/`](./amd_hip_port/cupotential_open/)) | **3D 周期盒子 27 邻格 Cell-List + 融合 `LJ 12-6` 范德华势 + 反应场库仑静电势 + 解析三维受力 $\vec{F}=-\nabla E$** (`float64`)<br>• `32,000` 原子体系<br>• `128,000` 原子体系 | `61.17 ms`<br>`242.57 ms` | `7.99 ms`<br>`27.19 ms` | 🏆 **`7.90 ms`** (快 `7.7×`)<br>🏆 **`22.43 ms`** (**反超 GB10 17.5%**，快 **`10.8×`**) | **全部 $N$ 个能量分量与 $3N$ 个受力分量（38.4 万项）在 CPU/CUDA/HIP 间逐值一致（相对 L2 差 = `0`）** |
-| **3. 深势 `Uni-Mol` 3D 高斯距离注意力核**<br>([`amd_hip_port/unimol_pairbias/`](./amd_hip_port/unimol_pairbias/)) | **真实微调权重导出：3D 距离矩阵 $\rightarrow$ 128 高斯核 $\rightarrow$ 128/GELU/64 投影 $\rightarrow$ 首层 64 头 Pair-Bias QKV 注意力** (8 真实药物分子 Batch，`FP32` 朴素参考核) | — | `5.238 ms` | `12.101 ms` | **跨卡及对官方 PyTorch 最大绝对误差仅 `1.53 × 10⁻⁵`** |
+| **3. `PME (3D-FFT)` 长程静电 + 1,000 步真分子动力学轨迹**<br>([`amd_hip_port/cupotential_pme_md/`](./amd_hip_port/cupotential_pme_md/)) | **4 阶 B 样条电荷铺展 $\rightarrow 64^3$ `cuFFT/hipFFT` $\rightarrow$ Ewald 格林函数 $\rightarrow$ 1,000 步设备驻留 MD**<br>• NVE Velocity-Verlet (1000 步)<br>• NVT BAOAB 300K 热浴 (1000 步) | `2.873 s`<br>`2.872 s` | `1.063 s`<br>`1.067 s` | 🏆 **`0.797 s`** (**反超 GB10 25%**)<br>🏆 **`0.658 s`** (**反超 GB10 38%**) | **初始全受力 `CUDA vs HIP` 相对 L2 = `4.66×10⁻¹⁶`；NVE 步长减半能量漂移改善 `4.0004×`** |
+| **4. `VASP Daviator` 批处理量子力学 `Block-Davidson` 本征值**<br>([`amd_hip_port/daviator_batched_dft/`](./amd_hip_port/daviator_batched_dft/)) | **64 个 k 点 × 384 平面波 × 16 条能带 = 1,024 个量子本征值** (`H·V` + Rayleigh-Ritz 投影 + 残差 + 预条件)<br>串行发射 vs Batched 批处理核心 | `2.083 s` | 串行 `0.103 s` $\rightarrow$ 批处理 **`0.058 s`** (`1.77×`) | 串行 `0.235 s` $\rightarrow$ 批处理 **`0.084 s`** (**批处理提速 `2.80×`**) | **1,024 个量子本征值与精确 `eigvalsh` 最大绝对误差 $\le 4.73 \times 10^{-14}$** |
+| **5. `cuPhoton.xBeam` 黑洞射电干涉 FX 相关器 + CLEAN 成像**<br>([`amd_hip_port/cuphoton_xbeam_fx/`](./amd_hip_port/cuphoton_xbeam_fx/)) | **16 台射电望远镜 × 120 条基线 × 6,710 万复采样 (`complex128`)**<br>F 阶段 FFT + X 阶段基线交叉关联 `S_a·S_b*` | F+X `1.095 s`<br>(X 相关 `924.8 ms`) | F+X `0.140 s`<br>(X 相关 `22.0 ms`) | F+X **`0.292 s`**<br>(X 相关 **`40.0 ms`**，快 CPU **`23.1×`**) | **跨卡复数可见度矩阵相对 L2 = `2.84×10⁻¹⁶`；重建黑洞光子环图像跨卡 L2 = `7.51×10⁻¹⁶` (`PSNR 15.23 dB`)** |
+| **6. `GPU-HMMER` 10 万条蛋白质序列 Profile-HMM 维特比搜索**<br>([`amd_hip_port/gpuhmmer_viterbi/`](./amd_hip_port/gpuhmmer_viterbi/)) | **真实 56 位点 `GB1` 三状态 (`M/I/D`) Profile-HMM 扫描 `100,000` 条蛋白质序列（~1,920 万氨基酸残基）** | `1,136.21 ms`<br>(`16.88M 残基/s`) | `234.40 ms`<br>(`81.82M 残基/s`) | 🏆 **`60.70 ms`**<br>(**`315.97M 残基/s`，反超 GB10 `3.86×`、快 CPU `18.7×`！**) | **全部 100,000 条序列得分在 CPU/CUDA/HIP 三端 100% 逐字节相同（`SHA256: aaf96d10...`）** |
+| **7. 深势 `Uni-Mol` 全 15 层 `47.3M` 参数端到端原生 HIP 推理**<br>([`amd_hip_port/unimol_full15_hip/`](./amd_hip_port/unimol_full15_hip/)) | **导出全部 195 个权重张量 (`47,331,139` 参数)，用原生 `HIP + hipBLAS` 跑完 112 个 `ESOL` 测试药物分子全 15 层前向传播** | — | `1.756 s` (FP64)<br>`RMSE 0.573634` | **`2.291 s`** (FP64)<br>**`RMSE 0.573634, R² 0.930467`** | **核对全部 5,050 万个中间张量；同公式 FP64 下 112 个分子预测最大差 `7.11×10⁻¹⁵ logS`，对官方 PyTorch FP32 最大差 `2.27×10⁻⁶`** |
+| **8. 深势 `Uni-Mol` 首层 128 高斯核 + 64 头 Pair-Bias 注意力核**<br>([`amd_hip_port/unimol_pairbias/`](./amd_hip_port/unimol_pairbias/)) | **8 真实药物分子 Batch (`FP32` 朴素教育参考核)** | — | `5.238 ms` | `12.101 ms` | **跨卡及对官方 PyTorch 最大绝对误差仅 `1.53 × 10⁻⁵`** |
 
 ---
 
-## 二、 核心可视化大图
+## 二、 九张核心跨架构实测可视化大图
 
-| 算子一：`cuSpa` 细胞多边形射线法 (`GB10` vs `RX 9070 XT 0.92ms` 零误差) | 算子二：开源 3D 分子非键力场 `open-cupotential` (`128K` 原子 `9070 XT 22.43ms`) |
+| 算子 1：`cuSpa` 细胞多边形射线法 (`GB10` vs `RX 9070 XT 0.92ms` 零误差) | 算子 2：开源 3D 分子非键力场 `open-cupotential` (`128K` 原子 `9070 XT 22.43ms`) |
 | :---: | :---: |
 | ![fig4](./visuals/fig4_cuspa_cell_polygon_raycasting.svg) | ![fig6](./visuals/fig6_open_cupotential_md_forcefield_amd_vs_nvidia.svg) |
-| **算子三：`BBBP` 血脑屏障 `Uni-Mol` 逐原子遮挡归因与 AMD 注意力核对账** | **姊妹篇：蛋白质大模型 `ESM-2` 真机微调 (`Spearman 0.898`) 与突变热图** |
-| ![fig5](./visuals/fig5_bbbp_unimol_roc_and_atom_attribution.svg) | ![fig7](./visuals/fig7_protein_esm2_finetune_and_mutation_scan.svg) |
+| **算子 3：`PME 3D-FFT` 长程静电 + 1,000 步真 MD 轨迹 (`9070 XT 0.797s`)** | **算子 4：`VASP Daviator` 64 k 点批处理量子 `Block-Davidson` 本征值** |
+| ![fig8](./visuals/fig8_pme_kspace_and_1000step_md_trajectory.svg) | ![fig9](./visuals/fig9_daviator_batched_davidson_vasp_band.svg) |
+| **算子 5：`cuPhoton.xBeam` 6,710 万采样黑洞光子环 FX 相关与 CLEAN 成像** | **算子 6：`GPU-HMMER` 10 万条蛋白质序列维特比扫描 (`9070 XT 60.7ms` 快 3.86×)** |
+| ![fig10](./visuals/fig10_cuphoton_eht_blackhole_correlator.svg) | ![fig11](./visuals/fig11_gpuhmmer_100k_protein_viterbi.svg) |
+| **算子 7：深势 `Uni-Mol` 全 15 层 `47.3M` 参数 `AMD RX 9070 XT` 端到端推理 (`7.11e-15`)** | **算子 8：`BBBP` 血脑屏障 `Uni-Mol` 逐原子遮挡归因与首层注意力核** |
+| ![fig12](./visuals/fig12_unimol_full15layer_end2end_amd9070.svg) | ![fig5](./visuals/fig5_bbbp_unimol_roc_and_atom_attribution.svg) |
 
 ---
 
