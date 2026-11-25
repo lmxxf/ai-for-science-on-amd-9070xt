@@ -7,11 +7,11 @@
     },
     {
       "path": "REPORT.md",
-      "sha256": "89c5e91fa3d5aa57591a68e77174ece265648fcbafc4cdb94f3644e286077f57"
+      "sha256": "08906882ecefc5db65f0d76b0471f10d28eaac48e3b33e968a5046fec9c25a43"
     },
     {
       "path": "DevHistory.md",
-      "sha256": "a83f62fc90c814d30144c28435646ee1979b38bf83c84da2dea5dd7f0639ac0e"
+      "sha256": "faac98a330f995d262d7f189af42e9798d98d9118aa3081704b1f5f0d07145fc"
     },
     {
       "path": "MODULE6_NOTES.md",
@@ -27,7 +27,7 @@
     },
     {
       "path": "exp5_open_cupotential_hip.py",
-      "sha256": "0677243f2a413c1b3d0ff2d76bce7f5dd1919f3362412d758f5968fc29e3053d"
+      "sha256": "32d437774c3714e2f7069647e4a5d3748366737af22dc05090b5fe0567aa8443"
     },
     {
       "path": "render_module7.py",
@@ -67,7 +67,7 @@
     },
     {
       "path": "amd_hip_port/cupotential_open/README.md",
-      "sha256": "2709159fc6951d389e2250afd53346c8d5f709bd0ae60cafa03a16b26ba043b3"
+      "sha256": "2301653c4fec611460bc6f2a52542d4b0e8a0186b748f77f0c97f7a0803bb9ef"
     },
     {
       "path": "amd_hip_port/cupotential_open/run_windows.cmd",
@@ -87,7 +87,7 @@
     },
     {
       "path": "amd_hip_port/cupotential_open/open_nonbonded.cpp",
-      "sha256": "6318133a3462417b9e1ca415ab994270e2b57ba6db54dd42b51ed1bd6c17f49a"
+      "sha256": "3d9397b3662aca08554374c94c86c59a416c99e01ae652e4004f67079bc0dc48"
     },
     {
       "path": "amd_hip_port/cupotential_open/LICENSE",
@@ -147,7 +147,7 @@
     },
     {
       "path": "results/module7_results.json",
-      "sha256": "d5708b461df91d66519be2d4a378b9e1772b231a95b7f4bd59a782caad5253c4"
+      "sha256": "afca3682d30c9a1f8a5df86ae7d7e9950ad73deb788f2557376272216058402a"
     },
     {
       "path": "results/module6_pairbias_compile.log",

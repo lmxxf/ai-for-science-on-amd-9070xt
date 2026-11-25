@@ -7,11 +7,11 @@
     },
     {
       "path": "REPORT.md",
-      "sha256": "89c5e91fa3d5aa57591a68e77174ece265648fcbafc4cdb94f3644e286077f57"
+      "sha256": "08906882ecefc5db65f0d76b0471f10d28eaac48e3b33e968a5046fec9c25a43"
     },
     {
       "path": "DevHistory.md",
-      "sha256": "a83f62fc90c814d30144c28435646ee1979b38bf83c84da2dea5dd7f0639ac0e"
+      "sha256": "faac98a330f995d262d7f189af42e9798d98d9118aa3081704b1f5f0d07145fc"
     },
     {
       "path": "guard_process.py",
@@ -51,7 +51,7 @@
     },
     {
       "path": "exp9_cuphoton_blackhole_fx_hip.py",
-      "sha256": "fc23bdfba707d8c2ef1b3836a333a168d2c1db92a935ca053964a43b062b699a"
+      "sha256": "44032ccc5408f73d49111999e0de29a093e9d10f52f7177ffbb30743deb34258"
     },
     {
       "path": "exp10_gpuhmmer_viterbi_hip.py",
@@ -143,7 +143,7 @@
     },
     {
       "path": "amd_hip_port/cuphoton_xbeam_fx/fx.cpp",
-      "sha256": "7c1212db5b2b8bf55ca1e982eabc215607ae58460cb696bbd8f19a6bd0286da9"
+      "sha256": "b8e0b8c906c29e4f5fd274f986503f3e131a7949925906cb4809ad5ec5c47c56"
     },
     {
       "path": "amd_hip_port/cuphoton_xbeam_fx/run_windows.cmd",
@@ -359,7 +359,7 @@
     },
     {
       "path": "results/module11_results.json",
-      "sha256": "0eef77c8b7f59f34d36c161c566bd33fdeb0bcd76f30793f48c96d52ff16ef58"
+      "sha256": "e064b452009401416700c0e74530fc01da5bad55e487b005abfab5494c7cc0d9"
     },
     {
       "path": "results/module13_mixed_execution.log",

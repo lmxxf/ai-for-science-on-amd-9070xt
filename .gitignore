@@ -34,3 +34,8 @@ results/module14_*/*.bin
 results/module15_build/
 results/module15_data/
 results/module15_*.bin
+# Nonbonded layout trial arrays/build products remain local
+results/module7_optimized/**/*.bin
+results/module7_optimized_soa/**/*.bin
+results/module7_optimized_previous/**/*.bin
+results/module7_optimized_build/

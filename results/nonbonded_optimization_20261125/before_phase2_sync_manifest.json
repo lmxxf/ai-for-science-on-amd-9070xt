@@ -1,0 +1,233 @@
+{
+  "source_workspace": "/home/lmxxf/work/ai-for-science-on-cuda-x",
+  "files": [
+    {
+      "path": "PHASE2_FULL_AI4S_PLAN.md",
+      "sha256": "860415637494e2616d4e2e564949c7279700b6ed0f1b95c17526a81b13fc8d7e"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "89c5e91fa3d5aa57591a68e77174ece265648fcbafc4cdb94f3644e286077f57"
+    },
+    {
+      "path": "DevHistory.md",
+      "sha256": "a83f62fc90c814d30144c28435646ee1979b38bf83c84da2dea5dd7f0639ac0e"
+    },
+    {
+      "path": "MODULE6_NOTES.md",
+      "sha256": "66f6fb660be32b7717259425659ba364dce4df159421425ddf0c9a48c88fdb5d"
+    },
+    {
+      "path": "MODULE7_NOTES.md",
+      "sha256": "4475a34e89054286053260e25501cadb904f4db06a8c3bae5c97b017fac896f0"
+    },
+    {
+      "path": "MODULE8_NOTES.md",
+      "sha256": "446ff6b760a9c9034d46fa0771756eaefb0e16d456222f5716a2bdc2e731e56a"
+    },
+    {
+      "path": "exp5_open_cupotential_hip.py",
+      "sha256": "0677243f2a413c1b3d0ff2d76bce7f5dd1919f3362412d758f5968fc29e3053d"
+    },
+    {
+      "path": "render_module7.py",
+      "sha256": "75eb9d4a9c18e9c3b2b350fba574c8a74b7d3914b6173cd36c93a5687e8da482"
+    },
+    {
+      "path": "guard_process.py",
+      "sha256": "2cbc59d866dfef94bbfbe12630fc684594e5d14764b794a57760d83967f1f6ed"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/run_pairbias.py",
+      "sha256": "e67f5fde5510daade75c4415ec54948731b3a12a8ac17e9a8e7f086eb22ce075"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/run_windows.cmd",
+      "sha256": "be3005f88f79610a785df1d5b03d8ee05cc47fa6cc9a3568b8c4cdcfb00e098f"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/build_windows.cmd",
+      "sha256": "62e39bd6525f003410ef3d907e302523af72c236f828f8ef2d117f4351bc1000"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/build_windows.log",
+      "sha256": "c0036d48791ea356c8836f3814a05a62dd134e0cca3a0456111abf55fbba8093"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/pairbias.cpp",
+      "sha256": "dd0c105c8eab68a6579132925c6d314bd9edc1e2405fc7799ba49ed18bc44a8b"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/out_hip/timing.json",
+      "sha256": "6344d93fc5438bc2bf31a55c3ea792e21be4fc9c2431524ba879630a07c975fe"
+    },
+    {
+      "path": "amd_hip_port/unimol_pairbias/out_cuda/timing.json",
+      "sha256": "2f54aab2389f990ca1b2066d2ca6f352b7b7a65f7ced0cfaf44b0c6c154a2786"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/README.md",
+      "sha256": "2709159fc6951d389e2250afd53346c8d5f709bd0ae60cafa03a16b26ba043b3"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/run_windows.cmd",
+      "sha256": "97134a2646cd8155217c71d62194b9e4067a26bc760d9e32f4688c88f95352d2"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/build_windows.cmd",
+      "sha256": "e8b4db481755d24b4207371aa76b9c465b68e5daae3cfbbdb07398447097b39e"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/run_windows.log",
+      "sha256": "bc7721f229031868581ab8cdf6eb53c087bfd506878d8481277877820baa9fc1"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/build_windows.log",
+      "sha256": "a1663f7e9b36f008625fc85088368cdfd99970c4c7e8a2302618ad2b3e38377e"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/open_nonbonded.cpp",
+      "sha256": "6318133a3462417b9e1ca415ab994270e2b57ba6db54dd42b51ed1bd6c17f49a"
+    },
+    {
+      "path": "amd_hip_port/cupotential_open/LICENSE",
+      "sha256": "b59c9be8101efa14586748effa8894d7f4cebb72bdaf5a4157b2b9ff578ea852"
+    },
+    {
+      "path": "results/module8_mutation_scan.csv",
+      "sha256": "ef31d65a4acd43567299570dd77e3cc3a1635f6cf2b520d8a94355c01ee1fd98"
+    },
+    {
+      "path": "results/module8_test_predictions.csv",
+      "sha256": "1a9396c9069d1f5b6af80cefaec9acc57de75b94195b696f832ec857a07f1aa7"
+    },
+    {
+      "path": "results/module8_data.json",
+      "sha256": "69af2569fe7b3c21cd6de46448785d60cb4951fff62b50b1df36ad9aec2ecce8"
+    },
+    {
+      "path": "results/module8_results.json",
+      "sha256": "6ab80aa321279ea7fcb013fd78a73b87f8da3b66550d3fe5d55c7274fa95113a"
+    },
+    {
+      "path": "results/module7_cpu_validation.json",
+      "sha256": "0f941ff09339302ce868802b94a341ab99597793a2bebcc723f111f5c58274f3"
+    },
+    {
+      "path": "results/module6_pairbias_results.json",
+      "sha256": "46c9ab97181b9923c77d929d8e808a3493f508044085192ad5aa0fa2c5240f83"
+    },
+    {
+      "path": "results/module8_biopython_descriptors.csv",
+      "sha256": "25369ec0b8721c01eab20571a352c35d9e4c13f347c13f9e5a0f8580aa69c5c7"
+    },
+    {
+      "path": "results/module8_train.log",
+      "sha256": "e36aeb430f12b984596bc4a6873f36f7f74ebb161191aa6b8a36fd4584ad6e93"
+    },
+    {
+      "path": "results/module8_prepare.log",
+      "sha256": "b4a54f5effb9ffd904aed739769fc85e0305f60db006f7acc4ee53e51711c586"
+    },
+    {
+      "path": "results/module6_results.json",
+      "sha256": "09d8ed73907c2eb11ef5110efd7ca19617490f626b6cb4214ce2e23ae5b743b3"
+    },
+    {
+      "path": "results/module6_train.log",
+      "sha256": "559a1800903b5760e2a96f1a53435fd475acde978d587f87a6081c1a428a4b64"
+    },
+    {
+      "path": "results/module8_esm2_architecture.json",
+      "sha256": "155d1a60005b95e974a902f214eef467abf7836f38976683c9ced3275adc7f2b"
+    },
+    {
+      "path": "results/module6_split.json",
+      "sha256": "4bd5d8204047acd8c37505710d68a009ac4472d5c76919cdc7d07db85c8b0e21"
+    },
+    {
+      "path": "results/module7_results.json",
+      "sha256": "d5708b461df91d66519be2d4a378b9e1772b231a95b7f4bd59a782caad5253c4"
+    },
+    {
+      "path": "results/module6_pairbias_compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "results/module6_epochs.jsonl",
+      "sha256": "b4d667730e11568feeffd23d712f2e58e470bfe661564be100a98fe614692b36"
+    },
+    {
+      "path": "results/module8_architecture.log",
+      "sha256": "55d19b4148359d9beb651aa6aa3d2ac323c042954bc55fbc0018cb96d5a4028a"
+    },
+    {
+      "path": "results/bbbp_conformer_timing.json",
+      "sha256": "1ea7fa749afee105919d0240de15e210440a3b7a35beea894856d463e322b713"
+    },
+    {
+      "path": "results/module6_pairbias.log",
+      "sha256": "a56fca8eb241cb95661e23812c23186622b4561b691ac2a702fc58bcc6c69f32"
+    },
+    {
+      "path": "results/module8_epochs.jsonl",
+      "sha256": "d2b8851e0459abfc0a23576739ca71c51ed4761af19869fa077e551cad639de4"
+    },
+    {
+      "path": "results/module7_validation_cpu/timings.json",
+      "sha256": "5568185c2c311e154c5a141df48b72b3956b02882369be49dc45aae7a87a2691"
+    },
+    {
+      "path": "results/module7_cuda_32000/timings.json",
+      "sha256": "00b9a00695c5485a0a2a9f7d68d7f5d8a54b70730e86d17f581923422e4f88b0"
+    },
+    {
+      "path": "results/module7_cpu_128000/timings.json",
+      "sha256": "b27f80498c538eb09e69442b7a26988d0988366ce4bd8851ad896c6b9c78fec7"
+    },
+    {
+      "path": "results/module7_cuda_128000/timings.json",
+      "sha256": "0d50361eaeaf0f639e974cf6c738d1d4edf2b343174ef92b20e4615187f5edf3"
+    },
+    {
+      "path": "results/module7_hip_32000/timings.json",
+      "sha256": "73bcb119aaf0763edf6aaac1d6f8acc92981cea4b236712231ac52a75fbc2ef6"
+    },
+    {
+      "path": "results/module7_hip_128000/timings.json",
+      "sha256": "f1f8cbfcb4f9395aafb1d0354a332549f68f00510a898c6ef009545044b31c99"
+    },
+    {
+      "path": "results/module7_validation_translate_cpu/timings.json",
+      "sha256": "6a8a7661cd91df8e8d97224819b30a0b87ae14df918fb2c5d0c6dd450b2ce28b"
+    },
+    {
+      "path": "results/module7_cpu_32000/timings.json",
+      "sha256": "2fc794e4601ffeed565adcae648246c3478cdb547a3782f7def2b211e1c2d2a1"
+    },
+    {
+      "path": "visuals/fig5_bbbp_unimol_roc_and_atom_attribution.png",
+      "sha256": "63ba2ea8e7c30b20c55195d79cda5b79a20c45468744a480674edb3cd94a8ea9"
+    },
+    {
+      "path": "visuals/fig7_protein_esm2_finetune_and_mutation_scan.svg",
+      "sha256": "5fa517fe0ea964806645e1aa0f93b36be75c6f2cd65d622a586a1dc365091f41"
+    },
+    {
+      "path": "visuals/fig6_open_cupotential_md_forcefield_amd_vs_nvidia.svg",
+      "sha256": "284727ae0915b53a425269e544cf4906cb63b5eefbe5afbbdbcb1caaf59c8cf8"
+    },
+    {
+      "path": "visuals/fig5_bbbp_unimol_roc_and_atom_attribution.svg",
+      "sha256": "30a6b732f84431cb8ac833c578847c3372feba4e6ea6ea767e7f8a094f3b2011"
+    },
+    {
+      "path": "visuals/fig6_open_cupotential_md_forcefield_amd_vs_nvidia.png",
+      "sha256": "401fde0792a77ba16b597cc04743867c69e8ce3c54fbfa57f4f469e480ec7a32"
+    },
+    {
+      "path": "visuals/fig7_protein_esm2_finetune_and_mutation_scan.png",
+      "sha256": "cb89e12ed79e926a0305e220b2c1dbb8ccfad222dad030aeb4b8b3a49d3c641a"
+    }
+  ]
+}
