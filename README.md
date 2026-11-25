@@ -1,65 +1,165 @@
-# AI for Science on AMD RX 9070 XT (`gfx1201` HIP)：从 NVIDIA `CUDA-X cuSpa`、开源 3D 分子非键力场 `open-cupotential` 到深势 `Uni-Mol` 3D 高斯距离注意力核跨架构真机对账
+# AI for Science on AMD RX 9070 XT：七大科学算子实测
 
-本仓库在消费级 **`AMD Radeon RX 9070 XT`（`gfx1201` RDNA4，16GB，Windows 11 + ROCm 10.2 `clang++` HIP + `hipCUB`）** 上，真机编译、移植并与 **`NVIDIA DGX Spark`（`GB10` `sm_121` Blackwell）** 逐位对账了 **AI for Science 三大底层 GPU 核心算子**（证明科学计算与分子/生物几何算子依赖的是古典 SIMT 流处理器而非 Tensor Core 矩阵锁，在 AMD RDNA4 显卡上可直接跑出与 NVIDIA 持平甚至反超的性能）：
+把科学计算里的几何、力场、FFT、特征值和动态规划搬上消费级 AMD 显卡：**同一份输入，同源 CUDA/HIP 内核，CPU 参考答案，全量数值对账。** 另附深势 **47.3M、全15层 Uni-Mol** 的原生 HIP / hipBLAS 端到端推理。
 
-> 🔗 姊妹全栈仓库（含 `RDKit` / `Biopython` 科学库实验数据处理、深势 `47.3M` `Uni-Mol` 3D 分子大模型 `ESOL/BBBP` 全参数微调、Meta `7.5M` `ESM-2` 蛋白质大模型 `GB1` 微调与科研 Agent `Skill` 串联）：[`lmxxf/ai-for-science-on-cuda-x`](https://github.com/lmxxf/ai-for-science-on-cuda-x)
+## 六门学科，传统软件与 CUDA-X 怎么分工？
 
----
+| 科学领域 | 常用传统软件 | NVIDIA CUDA-X 对应库 | GPU 接手哪一步？ |
+|---|---|---|---|
+| 空间单细胞生物学 | Scanpy、Shapely | **cuSpa** | 细胞多边形索引、点归属、细胞×基因统计 |
+| 分子动力学 | OpenMM、GROMACS | **cuPotential** | 邻居列表、非键受力、PME长程静电、时间积分 |
+| 小分子化学 | RDKit | **nvMolKit** | 大批量三维构象力场松弛 |
+| 材料量子计算 | VASP | **Daviator** | 多组小体系的批处理本征值求解 |
+| 射电天文 | 传统射电关联与成像软件 | **cuPhoton.xBeam** | 分信道FFT与全基线复数交叉相关 |
+| 蛋白质序列注释 | Biopython、HMMER | **GPU-HMMER** | Profile-HMM三状态动态规划扫描 |
 
-## 一、 八大跨架构（`NVIDIA GB10 CUDA` vs `AMD RX 9070 XT HIP`）真机对决总表
+测试设备：**AMD RX 9070 XT，gfx1201，16GB，Windows 11＋ROCm 10.2**；对照为 **NVIDIA DGX Spark GB10，sm_121**。科学核使用FP64或complex128，两端关闭FMA融合收缩与fastmath。
 
-| 算子模块 | 科学计算任务与规模 | CPU 基线耗时 | `NVIDIA GB10` (`sm_121` CUDA) | 🔥 `AMD RX 9070 XT` (`gfx1201` HIP) | 跨架构精度对账结果 |
-| :--- | :--- | ---: | ---: | ---: | :--- |
-| **1. `cuSpa` 空间单细胞多边形库**<br>([`amd_hip_port/`](./amd_hip_port/)) | **`50,000` 细胞 × `2,000,000` 转录点 × `500` 基因** (`float64`)<br>① 网格索引 / ② 水平射线查询 / ③ `hipCUB` 排序转 CSR | 全流程 `272.27 ms`<br>(射线查询 `236.06 ms`) | 同源 C++ 全流程 **`5.760 ms`**<br>(射线查询 `1.520 ms`) | 同源 C++ 全流程 **`6.050 ms`** (快 **`45.0×`**)<br>(🏆 **射线查询仅 `0.921 ms`**，快 **`256.3×`**) | **200 万点归属与完整 CSR 四个数组 SHA256 100% 逐字节相同（`0 mismatch`）** |
-| **2. `open-cupotential` 开源 3D 分子非键力场**<br>([`amd_hip_port/cupotential_open/`](./amd_hip_port/cupotential_open/)) | **3D 周期盒子 27 邻格 Cell-List + 融合 `LJ 12-6` 范德华势 + 反应场库仑静电势 + 解析三维受力 $\vec{F}=-\nabla E$** (`float64`)<br>• `32,000` 原子体系<br>• `128,000` 原子体系 | `61.17 ms`<br>`242.57 ms` | `7.99 ms`<br>`27.19 ms` | 🏆 **`7.90 ms`** (快 `7.7×`)<br>🏆 **`22.43 ms`** (**反超 GB10 17.5%**，快 **`10.8×`**) | **全部 $N$ 个能量分量与 $3N$ 个受力分量（38.4 万项）在 CPU/CUDA/HIP 间逐值一致（相对 L2 差 = `0`）** |
-| **3. `PME (3D-FFT)` 长程静电 + 1,000 步真分子动力学轨迹**<br>([`amd_hip_port/cupotential_pme_md/`](./amd_hip_port/cupotential_pme_md/)) | **4 阶 B 样条电荷铺展 $\rightarrow 64^3$ `cuFFT/hipFFT` $\rightarrow$ Ewald 格林函数 $\rightarrow$ 1,000 步设备驻留 MD**<br>• NVE Velocity-Verlet (1000 步)<br>• NVT BAOAB 300K 热浴 (1000 步) | `2.873 s`<br>`2.872 s` | `1.063 s`<br>`1.067 s` | 🏆 **`0.797 s`** (**反超 GB10 25%**)<br>🏆 **`0.658 s`** (**反超 GB10 38%**) | **初始全受力 `CUDA vs HIP` 相对 L2 = `4.66×10⁻¹⁶`；NVE 步长减半能量漂移改善 `4.0004×`** |
-| **4. `VASP Daviator` 批处理量子力学 `Block-Davidson` 本征值**<br>([`amd_hip_port/daviator_batched_dft/`](./amd_hip_port/daviator_batched_dft/)) | **64 个 k 点 × 384 平面波 × 16 条能带 = 1,024 个量子本征值** (`H·V` + Rayleigh-Ritz 投影 + 残差 + 预条件)<br>串行发射 vs Batched 批处理核心 | `2.083 s` | 串行 `0.103 s` $\rightarrow$ 批处理 **`0.058 s`** (`1.77×`) | 串行 `0.235 s` $\rightarrow$ 批处理 **`0.084 s`** (**批处理提速 `2.80×`**) | **1,024 个量子本征值与精确 `eigvalsh` 最大绝对误差 $\le 4.73 \times 10^{-14}$** |
-| **5. `cuPhoton.xBeam` 黑洞射电干涉 FX 相关器 + CLEAN 成像**<br>([`amd_hip_port/cuphoton_xbeam_fx/`](./amd_hip_port/cuphoton_xbeam_fx/)) | **16 台射电望远镜 × 120 条基线 × 6,710 万复采样 (`complex128`)**<br>F 阶段 FFT + X 阶段基线交叉关联 `S_a·S_b*` | F+X `1.095 s`<br>(X 相关 `924.8 ms`) | F+X `0.140 s`<br>(X 相关 `22.0 ms`) | F+X **`0.292 s`**<br>(X 相关 **`40.0 ms`**，快 CPU **`23.1×`**) | **跨卡复数可见度矩阵相对 L2 = `2.84×10⁻¹⁶`；重建黑洞光子环图像跨卡 L2 = `7.51×10⁻¹⁶` (`PSNR 15.23 dB`)** |
-| **6. `GPU-HMMER` 10 万条蛋白质序列 Profile-HMM 维特比搜索**<br>([`amd_hip_port/gpuhmmer_viterbi/`](./amd_hip_port/gpuhmmer_viterbi/)) | **真实 56 位点 `GB1` 三状态 (`M/I/D`) Profile-HMM 扫描 `100,000` 条蛋白质序列（~1,920 万氨基酸残基）** | `1,136.21 ms`<br>(`16.88M 残基/s`) | `234.40 ms`<br>(`81.82M 残基/s`) | 🏆 **`60.70 ms`**<br>(**`315.97M 残基/s`，反超 GB10 `3.86×`、快 CPU `18.7×`！**) | **全部 100,000 条序列得分在 CPU/CUDA/HIP 三端 100% 逐字节相同（`SHA256: aaf96d10...`）** |
-| **7. 深势 `Uni-Mol` 全 15 层 `47.3M` 参数端到端原生 HIP 推理**<br>([`amd_hip_port/unimol_full15_hip/`](./amd_hip_port/unimol_full15_hip/)) | **导出全部 195 个权重张量 (`47,331,139` 参数)，用原生 `HIP + hipBLAS` 跑完 112 个 `ESOL` 测试药物分子全 15 层前向传播** | — | `1.756 s` (FP64)<br>`RMSE 0.573634` | **`2.291 s`** (FP64)<br>**`RMSE 0.573634, R² 0.930467`** | **核对全部 5,050 万个中间张量；同公式 FP64 下 112 个分子预测最大差 `7.11×10⁻¹⁵ logS`，对官方 PyTorch FP32 最大差 `2.27×10⁻⁶`** |
-| **8. 深势 `Uni-Mol` 首层 128 高斯核 + 64 头 Pair-Bias 注意力核**<br>([`amd_hip_port/unimol_pairbias/`](./amd_hip_port/unimol_pairbias/)) | **8 真实药物分子 Batch (`FP32` 朴素教育参考核)** | — | `5.238 ms` | `12.101 ms` | **跨卡及对官方 PyTorch 最大绝对误差仅 `1.53 × 10⁻⁵`** |
+[全栈姊妹仓库](https://github.com/lmxxf/ai-for-science-on-cuda-x)负责RDKit/Biopython数据处理、Uni-Mol与ESM-2微调和科研Skill编排；本仓聚焦原生HIP科学算子与跨架构核验。
 
----
+## 七大算子实测总表
 
-## 二、 九张核心跨架构实测可视化大图
+CPU列为 **DGX Spark GB10主机ARM单线程基线**；PME与FX使用Python/NumPy/SciPy。时间按各项实际任务计量，传输与磁盘I/O另记；Davidson列明确包含初始化、上传和最终下载。
 
-| 算子 1：`cuSpa` 细胞多边形射线法 (`GB10` vs `RX 9070 XT 0.92ms` 零误差) | 算子 2：开源 3D 分子非键力场 `open-cupotential` (`128K` 原子 `9070 XT 22.43ms`) |
-| :---: | :---: |
-| ![fig4](./visuals/fig4_cuspa_cell_polygon_raycasting.svg) | ![fig6](./visuals/fig6_open_cupotential_md_forcefield_amd_vs_nvidia.svg) |
-| **算子 3：`PME 3D-FFT` 长程静电 + 1,000 步真 MD 轨迹 (`9070 XT 0.797s`)** | **算子 4：`VASP Daviator` 64 k 点批处理量子 `Block-Davidson` 本征值** |
-| ![fig8](./visuals/fig8_pme_kspace_and_1000step_md_trajectory.svg) | ![fig9](./visuals/fig9_daviator_batched_davidson_vasp_band.svg) |
-| **算子 5：`cuPhoton.xBeam` 6,710 万采样黑洞光子环 FX 相关与 CLEAN 成像** | **算子 6：`GPU-HMMER` 10 万条蛋白质序列维特比扫描 (`9070 XT 60.7ms` 快 3.86×)** |
-| ![fig10](./visuals/fig10_cuphoton_eht_blackhole_correlator.svg) | ![fig11](./visuals/fig11_gpuhmmer_100k_protein_viterbi.svg) |
-| **算子 7：深势 `Uni-Mol` 全 15 层 `47.3M` 参数 `AMD RX 9070 XT` 端到端推理 (`7.11e-15`)** | **算子 8：`BBBP` 血脑屏障 `Uni-Mol` 逐原子遮挡归因与首层注意力核** |
-| ![fig12](./visuals/fig12_unimol_full15layer_end2end_amd9070.svg) | ![fig5](./visuals/fig5_bbbp_unimol_roc_and_atom_attribution.svg) |
+| 模块 | 完整任务 | CPU基线 | GB10 CUDA | RX 9070 XT HIP | 精度与结果 |
+|---|---|---:|---:|---:|---|
+| **1 cuSpa** | 5万细胞×200万点×500基因：索引＋查询＋CSR | **272.274ms** | **5.760ms** | **6.050ms** | 点归属＋CSR共4个输出数组逐字节一致 |
+| ↳ 射线查询阶段 | 同一200万点查询 | 236.064ms | 1.520ms | **0.921ms** | AMD在这个阶段领先；全流程GB10更快 |
+| **2 非键力场** | 32,000 / 128,000原子，LJ＋反应场库仑＋解析力 | 61.168 / 242.567ms | 7.993 / 27.188ms | **7.901 / 22.426ms** | 全部逐原子能量与3N受力分量，三端L2＝0 |
+| **3 PME动力学** | 81原子、64³网格、1,000步NVE / NVT | 2.873 / 2.872s | 1.063 / 1.067s | **0.797 / 0.658s** | 初始跨卡受力L2＝4.66e-16；步长减半漂移改善4倍 |
+| **4 批量构象松弛** | 1,000真实ESOL分子×10新构象×200步 | 10.560909s | 0.689281s | **0.522216s** | 400,350个有效坐标及201步能量历史三端逐字节一致 |
+| **5 全驻留Davidson** | 64 / 256组，每组384维、求16根；含设置与传输 | 3.212 / 11.655s | 0.457 / 0.791s | **0.378 / 0.698s** | 4,096根本征值对精确解max_abs≤7.22e-15 |
+| **6 射电FX** | 16天线×120基线，67,108,864个复采样，完整F＋X | 1.056032s | 0.039637526s | **0.0198092s** | 跨卡可见度L2＝2.96e-16；共同CPU CLEAN图像L2＝6.73e-16 |
+| **7 Profile-HMM** | 100,000条序列、19,179,665残基、56位点M/I/D | 1,136.210ms | 234.400ms | **60.701ms** | 全部10万得分三端逐字节一致 |
 
----
+最新构象与FX记录来自 [`current_steady_state`及稳态账本](results/optimization_20261125/latest_ledger.json)：GPU完整预热5遍、正式7遍；CPU预热1遍、正式3遍。AMD FX的7次范围为19.731–21.024ms，表中取中位数。其他项目的原始计时、误差与校验见各节JSON。
 
-## 三、 仓库目录结构
+## 1. cuSpa：数清每个细胞里的基因点
 
-- [`amd_hip_port/`](./amd_hip_port/)：
-  - `common/`、`index/`、`query/`、`aggregate/`、`cuspa_harness.cpp`：`NVIDIA/cuspa` 的 HIP + `hipCUB` 移植源码与同源 C++ 评测驱动；
-  - `cupotential_open/`：原创 MIT 开源 3D 分子非键力场（3D Cell-List + Lennard-Jones 12-6 + Reaction-Field Coulomb + 解析力梯度 `open_nonbonded.cpp`，无需闭源 `libcupo.so`）；
-  - `unimol_pairbias/`：深势 `Uni-Mol` 3D 距离 128 高斯核与 64 头 Pair-Bias 注意力前向算子（`unimol_pairbias_harness.cpp`）。
-- [`results/`](./results/)：全套双端计时 JSON、SHA256 逐字节对账单与物理守恒校验记录。
-- [`REPORT.md`](./REPORT.md) & [`DevHistory.md`](./DevHistory.md)：完整实测报告与工程流水账。
+**实现：原源码HIP迁移。** NVIDIA cuSpa的Apache-2.0源码共11个C++/CUDA文件、2,378行；几何与索引算法保留，CUDA Runtime/CUB映射到HIP/hipCUB。
 
-## 第三阶段：五领域实算与完整Uni-Mol
+输入是细胞膜二维多边形、转录点坐标和基因编号；输出是每个点所属细胞，以及细胞×基因CSR矩阵。先用224×224均匀网格的包围盒过滤候选，再发水平射线数边界交点，最后把`(cell_id,gene_id)`打包、基数排序、游程计数。
 
-全部源码在`amd_hip_port/`的`cupotential_pme_md`、`daviator_batched_dft`、`cuphoton_xbeam_fx`、`gpuhmmer_viterbi`、`unimol_full15_hip`，新增图8–12和完整[REPORT.md](REPORT.md)已同步。
+这套合成空间组学量级负载上，**全流程AMD 6.050ms、GB10 5.760ms；仅射线阶段AMD 0.921ms、GB10 1.520ms**。200万点归属与完整CSR逐字节一致。
 
-- PME/1000步MD：81原子完整实/倒易与键角，9070XT NVE0.797s；能量漂移1.09e-4，步长减半改善4倍。64³ PME对直接Ewald误差4.94e-5明确保留。
-- Block-Davidson：64×384、1024本征值max_abs4.73e-14。批处理核心提速AMD2.80倍、端到端1.15倍，没有复现22倍；部分子空间算法在CPU。
-- 射电FX：6710万复采样，合成天空协方差→电压→FFT/相关→CPU CLEAN；跨GPU可见度差2.84e-16，恢复PSNR15.23dB，非EHT实测。
-- Profile-HMM：10万条三状态Viterbi，9070XT60.7ms，全部scores与CPU/GB10逐字节一致。植入/背景库是合成检出任务。
-- **完整15层Uni-Mol**：真实47.3M、原112个测试分子已在原生HIP/hipBLAS端到端执行。同FP64预测差7.1e-15；官方FP32 Gaussian兼容模式对官方完整FP32最大差2.27e-6<1e-5。旧BF16结果保留，不强行贴不同精度指标。
+源码实际位于[`common/`](amd_hip_port/common/)、[`index/`](amd_hip_port/index/)、[`query/`](amd_hip_port/query/)、[`aggregate/`](amd_hip_port/aggregate/)，入口是[`cuspa_harness.cpp`](amd_hip_port/cuspa_harness.cpp)与[`hipify_headers.py`](amd_hip_port/hipify_headers.py)。[完整对账JSON](results/module5_amd9070_results.json)；[数据导出与CPU基准驱动](https://github.com/lmxxf/ai-for-science-on-cuda-x/blob/main/exp3_cudax_cuspa_benchmark.py)。
 
-`python verify_phase3_results.py`检查全部同步源码/轻量证据哈希与验收摘要；主仓`verify_phase3.py`已从原始轨迹、本征对、全部可见度/score与50M层间元素独立重算。不是运行镜像摘要脚本就冒称重新跑GPU。大输入/权重/trace留实验机器，通过主仓脚本和各子目录README复现，不随Git传输。
+![二维网格与射线奇偶判定](visuals/fig4a_cuspa_grid_raycasting.svg)
 
-## 第四阶段：构象松弛与全GPU驻留求解
+![cuSpa全流程与查询阶段实测](visuals/fig4b_cuspa_benchmark.svg)
 
-- [`amd_hip_port/nvmolkit_batched_conformer/`](amd_hip_port/nvmolkit_batched_conformer/)：10k fresh ETKDG构象×200轮，简化重原子FF；CPU10.522s/GB103.229s/9070XT3.853s，全部有效XYZ/能量/历史三方逐位相同。弱排斥失败47→1138完整保留，修正同输入后47→0。不冒称MMFF94等价加速或实际nvMolKit全部功能。
-- [`amd_hip_port/daviator_batched_dft/resident.cpp`](amd_hip_port/daviator_batched_dft/resident.cpp)：共享Jacobi、两遍MGS与收敛全部GPU，24Ritz+8修正厚重启。64/256组15–16轮，λ误差<=7.22e-15；B256 batch总GB10/AMD0.791/0.698s。高seq/batch倍率来自本单block串行/并行占用率对照，不是官方性能承诺。
-- 381只读终审已完成，元数据及完整实验报告同步；发现2P0/11P1/11P2，正文和6资源未变。正式审稿意见位于公众号姊妹仓，不能把审稿完成当事实已全部修正。
+## 2. 非键力场：计算原子之间的推拉力
 
-`python verify_phase4_results.py`核对同步源文件和轻量证据哈希；完整原始数值/碰撞/本征对与文章哈希验收在主仓`verify_phase4.py`，不是摘要脚本重新跑GPU。更新图9、新图13及失败复盘见[REPORT.md](REPORT.md)。
+**实现：原创同源核。** cuPotential的OpenMM插件开源，核心`libcupo.so`及相关运行时为专有许可；本节按公开公式实现独立的CPU/CUDA/HIP非键核。
+
+输入是周期盒中的坐标、电荷、LJ参数；输出是每个原子的能量和三维受力。三维Cell-List把原子分桶，每个原子只查自身与周围27格；融合计算Lorentz–Berthelot混合的LJ12–6、反应场库仑势和解析梯度。
+
+128,000原子：**AMD 22.426ms、GB10 27.188ms、CPU 242.567ms**。全部384,000个受力分量及逐原子能量三端一致。另用独立全对全计算、有限差分和周期平移检验公式。
+
+[源码与物理参数](amd_hip_port/cupotential_open/) · [执行驱动](exp5_open_cupotential_hip.py) · [实测JSON](results/module7_results.json)
+
+![27邻格与非键势能曲线](visuals/fig6a_nonbonded_potential.svg)
+
+![32k与128k原子三平台实测](visuals/fig6b_nonbonded_benchmark.svg)
+
+## 3. PME＋动力学：把远处的电荷也算进去
+
+**实现：原创同源物理原型。** cuPotential的倒易空间核心由专有运行时提供；这里自行实现四阶B样条铺电、64³网格FFT、Ewald格林函数反卷积与一致的能量梯度。
+
+输入81个原子的坐标、电荷、质量与键角拓扑；输出每步势能、动能、温度、键长记录和最终坐标。CUDA调用cuFFT，HIP调用hipFFT；LJ、实空间erfc库仑、倒易项、自能和谐振键角共同参与每一步受力。
+
+27个合成柔性三原子分子，**完整1,000步GPU循环设备驻留**。NVE最大相对能量漂移1.09e-4；相同步长减半、步数加倍，漂移改善4.0004倍。BAOAB热浴后半段297.35±27.57K。64³网格对独立直接Ewald的受力L2误差4.94e-5，细化到128³降至5.84e-6。
+
+[源码与积分器](amd_hip_port/cupotential_pme_md/) · [驱动](exp7_pme_and_fused_md_hip.py) · [轨迹与精度JSON](results/module9_results.json)
+
+![PME与NVE动能势能交换](visuals/fig8a_pme_nve_conservation.svg)
+
+![完整1,000步动力学计时](visuals/fig8b_pme_md_benchmark.svg)
+
+## 4. 一万个构象：批量松弛三维姿势
+
+**实现：原创同源批量松弛核。** [NVIDIA-BioNeMo/nvMolKit](https://github.com/NVIDIA-BioNeMo/nvMolKit)按Apache-2.0开源；本仓以明确参数的简化重原子力场，实测block-per-conformer的批量并行机制。
+
+输入为ESOL前1,000分子各10个**新ETKDG起点**，加0.06Å显式扰动；输出优化坐标与201个能量记录。模型包含键长、余弦键角、二/三周期扭转及图距≥3的LJ＋库仑项。
+
+优化版每构象32线程，每个力场项只计算一次，再按原子固定顺序汇集梯度；回溯试探只算能量。**8,320个构象走共享内存参数缓存，1,680个较大构象走全局暂存回退，全部样本保留。** 最终耗时CPU 10.560909s、GB10 0.689281s、AMD 0.522216s，坐标和完整历史逐字节一致。
+
+平均键偏差0.0721→0.0113Å，声明的近碰撞47→0。初版弱排斥曾出现47→1138，失败和修正均保留；新起点哈希不变。旧RDKit的66.608s包含ETKDG＋真正MMFF94，与本节简化模型分开记录。
+
+[源码](amd_hip_port/nvmolkit_batched_conformer/) · [优化基准入口](benchmark_conformer_optimized.py) · [最新及历史JSON](results/module14_results.json)
+
+![真实构象的能量下降与几何检查](visuals/fig13a_conformer_relaxation.svg)
+
+![同源CPU与两卡最新稳态计时](visuals/fig13b_conformer_benchmark.svg)
+
+## 5. 全驻留Block-Davidson：一次求256组小矩阵
+
+**实现：原创同源本征值求解原型。** Daviator是面向VASP/ALCHEMI的官方产品；本仓按公开的Block-Davidson方法自行实现求解核。
+
+输入64或256组384×384周期势哈密顿量，每组求最小16个本征值与向量。`H·V`、Rayleigh–Ritz投影、共享内存Jacobi、两遍MGS正交化和厚重启，全部放入每组一个持久Block；迭代中主机往返为0。
+
+256组共4,096根，**AMD完整批处理0.698s、GB10 0.791s**，含设置、上传和最终下载；同原型AMD逐组串行20.495s。对独立`eigvalsh`的最大本征值误差7.22e-15，残差与正交性也逐项核对。表中CPU是迭代基线11.655s，直接NumPy `eigvalsh`另测0.906s。
+
+[持久核源码](amd_hip_port/daviator_batched_dft/resident.cpp) · [驱动](exp13_daviator_resident_hip.py) · [全驻留结果](results/module15_results.json)
+
+![迭代残差收敛](visuals/fig9a_davidson_convergence.svg)
+
+![串行与批处理完整耗时](visuals/fig9b_davidson_batch_benchmark.svg)
+
+## 6. 射电FX：从电压流算出干涉可见度
+
+**实现：原创同源干涉原型。** [官方cuPhoton（含xBeam）](https://github.com/NVIDIA/cuPhoton)已按Apache-2.0开源；本仓是独立FP64 FFT与复数相关实现。
+
+输入16天线、4,096帧、每帧1,024个复数电压采样；F阶段做FFT分信道，X阶段对120条基线按时间积累`Sa·conj(Sb)`，输出7,864,320个复数可见度。共同CPU后处理再做uv网格化、逆FFT与Högbom CLEAN，恢复合成非对称光子环。
+
+两卡统一选用**v2：预计算旋转因子、512线程FFT、2通道共享面板X**。预热5遍、测7遍，完整F＋X为**GB10 39.637526ms、AMD 19.8092ms**；CPU为1.056032s。全量可见度对CPU误差<4.5e-16，跨卡CLEAN图像L2＝6.73e-16。原型的合成天空、电压和恢复图共用同一物理模型。
+
+提速主要来自FFT；X寄存器复用曾在GB10变慢，三种变体和原始计时都保留。该计时是驻留F＋X，传输与CPU成像另列。
+
+[同源FFT/FX源码](amd_hip_port/cuphoton_xbeam_fx/fx.cpp) · [驱动](exp9_cuphoton_blackhole_fx_hip.py) · [最新稳态与历史](results/module11_results.json) · [优化证据](results/module11_optimized_results.json)
+
+![合成电压到光子环成像](visuals/fig10a_blackhole_imaging.svg)
+
+![同一v2配置的F与X计时](visuals/fig10b_cuphoton_fx_benchmark.svg)
+
+## 7. Profile-HMM：十万条蛋白质的模糊匹配
+
+**实现：原创同源M/I/D动态规划核。** 传统HMMER及官方推文中的GPU加速版为开源软件；本仓独立实现三状态Viterbi搜索核心。
+
+输入真实GB1数据构造的56位点发射轮廓和100,000条序列，输出每条序列的最高log2匹配分数。匹配M、插入I、删除D允许序列里出现错字、多字和缺字；每个线程独立处理一条序列。
+
+19,179,665个残基，**AMD 60.701ms、315.97M残基/s；GB10 234.400ms**。10万分数三端逐字节相同，SHA256以`aaf96d10`开头。500条植入GB1域与99,500条随机背景构成此次检出负载，ROC-AUC＝1.0。
+
+[源码](amd_hip_port/gpuhmmer_viterbi/viterbi.cpp) · [驱动](exp10_gpuhmmer_viterbi_hip.py) · [评分与计时JSON](results/module12_results.json)
+
+![M/I/D检出得分分布](visuals/fig11a_gpuhmmer_score_dist.svg)
+
+![10万序列计时与吞吐](visuals/fig11b_gpuhmmer_benchmark.svg)
+
+## 完整15层Uni-Mol：原生HIP＋hipBLAS端到端推理
+
+深势Uni-Mol是开源PyTorch分子模型。本仓把微调后的**195个权重张量、47,331,139个参数**导出，完整实现128高斯核、64头成对偏置逐层演化、15层Transformer和实际`512→1`回归头，直接用HIP C++与hipBLAS推理。
+
+输入112个真实ESOL测试分子的原子、距离矩阵；输出112个水溶性logS：
+
+| 完整推理验证 | 结果 |
+|---|---:|
+| 同公式FP64：AMD对GB10最大预测差 | **7.11e-15 logS** |
+| AMD FP64测试RMSE / R² | **0.573634 / 0.930467** |
+| 全部逐层检查元素 | **50,501,632** |
+| 最大逐层node误差 | **9.09e-13** |
+| 对齐官方Gaussian内部FP32后的最大预测差 | **2.27e-6 logS** |
+| 112分子FP64设备计算：GB10 / AMD | **1.756 / 2.291s** |
+
+[完整引擎源码](amd_hip_port/unimol_full15_hip/) · [导出与对账驱动](exp11_unimol_full15layer_amd9070.py) · [FP64完整结果](results/module13_results.json) · [官方FP32兼容对账](results/module13_mixed_precision_results.json)
+
+![112个真实药物的端到端预测重合](visuals/fig12a_unimol_hip_scatter.svg)
+
+![全15层数值误差与精度对齐](visuals/fig12b_unimol_15layer_error.svg)
+
+## 从哪里运行与核对？
+
+- Windows各算子目录提供`build_windows.cmd`和`run_windows.cmd`；优化FX使用[`build_optimized_windows.cmd`](amd_hip_port/cuphoton_xbeam_fx/build_optimized_windows.cmd)与[`run_optimized_windows.cmd`](amd_hip_port/cuphoton_xbeam_fx/run_optimized_windows.cmd)，构象使用对应[`optimized_build_windows.cmd`](amd_hip_port/nvmolkit_batched_conformer/optimized_build_windows.cmd)。工具链为现有Visual Studio＋ROCm，工作目录独立于其他项目。
+- 主仓负责大输入、RDKit/模型权重导出与完整独立复算：[主流水线](https://github.com/lmxxf/ai-for-science-on-cuda-x/blob/main/run_pipeline.py)、[cuSpa输入导出](export_module5_reference.py)、[完整物理数值验收](https://github.com/lmxxf/ai-for-science-on-cuda-x/blob/main/verify_phase3.py)、[构象与驻留求解验收](https://github.com/lmxxf/ai-for-science-on-cuda-x/blob/main/verify_phase4.py)。
+- 本仓轻量证据核验入口：[第三阶段](verify_phase3_results.py)、[第四阶段](verify_phase4_results.py)。源码、参数、JSON/SHA256与16张图在仓内；大输入、权重与完整原始trace通过上述驱动准备。
+- 更多工程记录：[REPORT.md](REPORT.md)、[DevHistory.md](DevHistory.md)、[最新优化账本](results/optimization_20261125/latest_ledger.json)。cuSpa保留上游Apache-2.0许可；原创原型各目录附MIT许可。
